@@ -1,0 +1,92 @@
+<html>
+<head>
+    <script>
+    if ('serviceWorker' in navigator) {
+  window.addEventListener('load', function() {
+    navigator.serviceWorker.register('/sw.js').then(function(registration) {
+      // Registration was successful
+      console.log('ServiceWorker registration successful with scope: ', registration.scope);
+    }, function(err) {
+      // registration failed :(
+      console.log('ServiceWorker registration failed: ', err);
+    });
+  });
+}
+
+        
+        function initialiseUI() {
+  // Set the initial subscription value
+  swRegistration.pushManager.getSubscription()
+  .then(function(subscription) {
+    isSubscribed = !(subscription === null);
+
+    if (isSubscribed) {
+      console.log('User IS subscribed.');
+        console.log(JSON.stringify(subscription));
+    } else {
+       subscribeUser();
+    }
+
+   // updateBtn();
+  });
+}
+        function updateBtn() {
+  if (isSubscribed) {
+    console.log('Disable Push Messaging');
+  } else {
+    console.log('Enable Push Messaging');
+  }
+
+  pushButton.disabled = false;
+    }
+        
+        navigator.serviceWorker.register('sw.js')
+.then(function(swReg) {
+  console.log('Service Worker is registered', swReg);
+
+  swRegistration = swReg;
+  initialiseUI();
+})
+        
+function subscribeUser() {
+  const applicationServerKey = urlB64ToUint8Array(applicationServerPublicKey);
+  swRegistration.pushManager.subscribe({
+    userVisibleOnly: true,
+    applicationServerKey: applicationServerKey
+  })
+  .then(function(subscription) {
+    console.log('User is subscribed.');
+
+    //updateSubscriptionOnServer(subscription);
+      console.log(subscription);
+
+    isSubscribed = true;
+
+    updateBtn();
+  })
+  .catch(function(err) {
+    console.log('Failed to subscribe the user: ', err);
+    updateBtn();
+  });
+}
+function urlB64ToUint8Array(base64String) {
+  const padding = '='.repeat((4 - base64String.length % 4) % 4);
+  const base64 = (base64String + padding)
+    .replace(/\-/g, '+')
+    .replace(/_/g, '/');
+
+  const rawData = window.atob(base64);
+  const outputArray = new Uint8Array(rawData.length);
+
+  for (let i = 0; i < rawData.length; ++i) {
+    outputArray[i] = rawData.charCodeAt(i);
+  }
+  return outputArray;
+}
+
+        
+       const applicationServerPublicKey = 'BFg7whu3R93VmUZAz0kLwPfU8-jPvc8QlEgrYNA-X7kEJTlSCp65s87OK0_IhiVOzdGeN3wR_N8HuZRBdDKmkcQ';
+
+    </script>
+    </head>
+</html>
